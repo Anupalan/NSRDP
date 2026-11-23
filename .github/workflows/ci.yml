@@ -1,0 +1,108 @@
+# CI and security scanning (SEC-01, REC-06 DevSecOps, INF-01).
+# Third-party scanners run from pinned container images instead of marketplace actions,
+# to keep the supply chain small.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GITLEAKS_IMAGE: ghcr.io/gitleaks/gitleaks:v8.21.2
+  TRIVY_IMAGE: aquasec/trivy:0.58.1
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install --require-hashes -r requirements-dev.lock && pip install --no-deps -e .
+      - run: ruff check .
+      - run: ruff format --check .
+
+  test:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: nsrdp
+          POSTGRES_PASSWORD: nsrdp-ci-only
+          POSTGRES_DB: nsrdp_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U nsrdp" --health-interval 5s --health-retries 10
+    strategy:
+      matrix:
+        database: [sqlite, postgresql]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install --require-hashes -r requirements-dev.lock && pip install --no-deps -e .
+      - name: pytest (${{ matrix.database }})
+        env:
+          NSRDP_TEST_DATABASE_URL: >-
+            ${{ matrix.database == 'postgresql'
+                && 'postgresql+psycopg://nsrdp:nsrdp-ci-only@localhost:5432/nsrdp_test'
+                || 'sqlite+pysqlite:///:memory:' }}
+        run: pytest -ra
+
+  dependency-scan:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install pip-audit
+      - name: pip-audit (known vulnerabilities in locked dependencies)
+        run: pip-audit --strict --require-hashes -r requirements-dev.lock
+
+  secret-scan:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: {fetch-depth: 0}
+      - name: gitleaks (full history)
+        run: docker run --rm -v "$PWD:/repo" "$GITLEAKS_IMAGE" git /repo --redact --verbose
+
+  static-analysis:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: pip install bandit
+      - name: bandit (Python SAST)
+        run: bandit -r src -ll
+      - name: trivy config (Dockerfile and Kubernetes misconfiguration)
+        run: >-
+          docker run --rm -v "$PWD:/src" "$TRIVY_IMAGE" config
+          --severity HIGH,CRITICAL --exit-code 1 /src
+
+  container:
+    runs-on: ubuntu-24.04
+    needs: [lint, test]
+    steps:
+      - uses: actions/checkout@v4
+      - name: build image
+        run: docker build -t nsrdp:${{ github.sha }} .
+      - name: trivy image (OS and library vulnerabilities)
+        run: >-
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock "$TRIVY_IMAGE" image
+          --severity HIGH,CRITICAL --ignore-unfixed --exit-code 1 nsrdp:${{ github.sha }}
+      - name: smoke test (container starts and answers /healthz)
+        run: |
+          docker run -d --name nsrdp -p 8000:8000 nsrdp:${{ github.sha }}
+          for i in $(seq 1 20); do curl -fsS localhost:8000/healthz && exit 0; sleep 1; done
+          docker logs nsrdp; exit 1

@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nsrdp-api
+spec:
+  replicas: 2                       # TBC: sized from volumes and SLA
+  selector:
+    matchLabels: {app.kubernetes.io/name: nsrdp-api}
+  template:
+    metadata:
+      labels: {app.kubernetes.io/name: nsrdp-api}
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: api
+          image: nsrdp
+          ports: [{containerPort: 8000, name: http}]
+          envFrom: [{configMapRef: {name: nsrdp-config}}]
+          env:
+            - name: NSRDP_DATABASE_URL
+              valueFrom: {secretKeyRef: {name: nsrdp-db, key: url}}
+          readinessProbe: {httpGet: {path: /healthz, port: http}, periodSeconds: 10}
+          livenessProbe: {httpGet: {path: /healthz, port: http}, periodSeconds: 20}
+          resources:                # TBC: placeholders until load profile is known
+            requests: {cpu: 250m, memory: 256Mi}
+            limits: {cpu: "1", memory: 512Mi}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: [ALL]}
+          volumeMounts: [{name: tmp, mountPath: /tmp}]
+      volumes: [{name: tmp, emptyDir: {}}]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nsrdp-api
+spec:
+  selector: {app.kubernetes.io/name: nsrdp-api}
+  ports: [{port: 80, targetPort: http, name: http}]
