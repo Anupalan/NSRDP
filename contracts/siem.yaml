@@ -1,0 +1,24 @@
+name: siem
+inventory_no: 12
+requirement: REC-06
+status: candidate          # SOC baseline and transport (syslog vs REST) are TBC
+owner: "SI security lead (named person TBC)"
+transport: REST
+operations:
+  forward_audit_event:
+    idempotent: true
+    request:
+      type: object
+      required: [event_id, tenant_id, actor, action, recorded_at, hash]
+      properties:
+        event_id: {type: string, examples: ["e-1"]}
+        tenant_id: {type: string, examples: ["t-1"]}
+        actor: {type: string, examples: ["officer-1"]}
+        action: {type: string, examples: ["rule.approved"]}
+        recorded_at: {type: string, examples: ["2027-01-01T00:00:00Z"]}
+        hash: {type: string, pattern: "^[0-9a-f]{64}$", examples: ["e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"]}
+    response:
+      type: object
+      required: [accepted]
+      properties:
+        accepted: {type: boolean, examples: [true]}

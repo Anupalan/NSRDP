@@ -1,0 +1,46 @@
+name: esign
+inventory_no: 2
+requirement: SIG-01
+status: candidate          # provider, document types and signing authority are TBC
+owner: "SI integration lead (named person TBC)"
+transport: REST
+operations:
+  sign_document:
+    idempotent: true
+    request:
+      type: object
+      required: [document_ref, document_sha256, signer_ref, purpose]
+      additionalProperties: false
+      properties:
+        document_ref: {type: string, examples: ["vault://certificates/C-1.pdf"]}
+        document_sha256: {type: string, pattern: "^[0-9a-f]{64}$", examples: ["e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"]}
+        signer_ref: {type: string, examples: ["idp:officer-1"]}
+        purpose: {type: string, enum: [certificate, permission, approval]}
+    response:
+      type: object
+      required: [signature_id, status]
+      properties:
+        signature_id: {type: string, examples: ["SIG-0001"]}
+        status: {type: string, enum: [signed, pending, rejected]}
+        signed_document_ref: {type: string, examples: ["vault://certificates/C-1.signed.pdf"]}
+  verify_signature:
+    idempotent: true
+    request:
+      type: object
+      required: [signature_id]
+      properties:
+        signature_id: {type: string, examples: ["SIG-0001"]}
+    response:
+      type: object
+      required: [valid]
+      properties:
+        valid: {type: boolean, examples: [true]}
+        signer_ref: {type: string, examples: ["idp:officer-1"]}
+reconcile:
+  operation: list_acknowledged
+  list_acknowledged:
+    request: {type: object, properties: {since: {type: string, examples: ["2027-01-01T00:00:00Z"]}}}
+    response:
+      type: object
+      required: [keys]
+      properties: {keys: {type: array, items: {type: string}}}

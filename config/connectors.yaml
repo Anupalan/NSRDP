@@ -1,0 +1,13 @@
+# Integration hub policy (D4, REC-05). Retry numbers are placeholders: SLA targets are TBC.
+defaults:
+  max_attempts: 6
+  base_delay_seconds: 30
+  max_delay_seconds: 3600
+  jitter_ratio: 0.2
+# Per-connector overrides, keyed by contract name, e.g.:
+# overrides:
+#   esign: {max_attempts: 3}
+overrides: {}
+# Adapter mode per connector: stub (default) or live. No live adapter exists yet because no
+# interface is confirmed. Can also be set with NSRDP_CONNECTOR_<NAME>_MODE.
+modes: {}
