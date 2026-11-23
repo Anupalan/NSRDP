@@ -1,0 +1,12 @@
+# Tenant hierarchy (PLT-01). The hierarchy and Centre-State operating model are TBC;
+# this is the SI proposal from the handover. Change here, not in code.
+levels:
+  - name: platform
+    children: [centre]
+  - name: centre
+    children: [state, entity]   # TBC: may Centre own entities directly?
+  - name: state
+    children: [entity]
+  - name: entity
+    children: []
+entity_types: [facility, recycler, buyer]   # TBC: full list of entity types

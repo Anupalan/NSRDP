@@ -1,0 +1,1 @@
+"""NSRDP platform core."""

@@ -1,0 +1,49 @@
+# Roles and permissions (REC-02). PLACEHOLDERS: the real role catalogue depends on the
+# Centre-State operating model, which is TBC. Permissions are what code checks; roles
+# are just bundles of permissions and can be renamed or regrouped here freely.
+permissions:
+  - tenant.read
+  - tenant.manage
+  - role.grant
+  - rules.read
+  - rules.author
+  - rules.approve
+  - registry.read
+  - registry.write
+  - audit.read
+  - connector.operate
+
+roles:
+  platform_admin:
+    permissions: [tenant.read, tenant.manage, role.grant, audit.read, connector.operate]
+    assignable_at: [platform]
+  centre_admin:
+    permissions: [tenant.read, tenant.manage, role.grant, audit.read]
+    assignable_at: [centre]
+  state_admin:
+    permissions: [tenant.read, tenant.manage, role.grant]
+    assignable_at: [state]
+  rules_author:
+    permissions: [rules.read, rules.author]
+    assignable_at: [platform, centre, state]
+  rules_approver:
+    permissions: [rules.read, rules.approve]
+    assignable_at: [platform, centre, state]
+  registry_officer:
+    permissions: [registry.read, registry.write, tenant.read]
+    assignable_at: [centre, state, entity]
+  auditor:
+    permissions: [audit.read, registry.read, rules.read, tenant.read]
+    assignable_at: [platform, centre, state]
+  entity_user:
+    permissions: [registry.read, tenant.read]
+    assignable_at: [entity]
+
+segregation_of_duties:
+  # Static: one principal may not hold both roles in overlapping tenant scope.
+  conflicting_roles:
+    - [rules_author, rules_approver]
+    - [auditor, platform_admin]
+  # Dynamic: one principal may not perform both actions on the same object.
+  conflicting_actions:
+    - [rules.author, rules.approve]
