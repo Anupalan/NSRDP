@@ -23,3 +23,4 @@ Tests run on SQLite for speed and on PostgreSQL in CI.
 | 1 | Tenant and RBAC skeleton | PLT-01, REC-02 | [01-tenancy-rbac.md](01-tenancy-rbac.md) |
 | 2 | Versioned rules engine | REC-01 (D2) | [02-rules-engine.md](02-rules-engine.md) |
 | 3 | Audit log and append-only event store | D3, TRC-01, TRC-02 (foundation), REC-06 (audit) | [03-event-store-audit.md](03-event-store-audit.md) |
+| 4 | Registry core and national ID scheme | REG-01, REG-02, REG-03, REG-04 (WRK-03 excluded, D5) | [04-registry-core.md](04-registry-core.md) |
