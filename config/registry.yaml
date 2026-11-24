@@ -1,0 +1,73 @@
+# Registry core (REG-01..04). The national identifier format is TBC: this is the SI
+# proposal. Changing `prefix`, kind codes or `sequence_width` here changes new IDs only;
+# issued IDs never change.
+id_scheme:
+  prefix: IN               # TBC: country/authority prefix
+  sequence_width: 8        # zero-padded per-kind sequence
+  separator: "-"
+  check: iso7064_mod97_10  # two check digits, as used in IBAN
+
+kinds:
+  facility:
+    code: FAC
+    requirement: REG-01
+    attributes:
+      name: {type: string, required: true}
+      authorization_ref: {type: string}
+      address: {type: string}
+      latitude: {type: number}
+      longitude: {type: number}
+    external_ids: []
+  vessel:
+    code: VSL
+    requirement: REG-02
+    attributes:
+      name: {type: string, required: true}
+      imo_number: {type: string, required: true, validator: imo}
+      flag_state: {type: string}
+      vessel_type: {type: string}
+      gross_tonnage: {type: number}
+      light_displacement_tonnage: {type: number}
+    external_ids: [imo_number]
+  worker:
+    code: WRK
+    requirement: REG-03
+    # D5: worker data is minimal until purpose, lawful basis/consent, field-level access
+    # and retention are agreed (TBC). Identity is an opaque reference from the identity
+    # provider (TBC); no name, national ID, contact or health data is stored here.
+    attributes:
+      identity_ref: {type: string, required: true}
+      employment_status: {type: string}
+    external_ids: [identity_ref]
+  material:
+    code: MAT
+    requirement: REG-04
+    attributes:
+      origin_vessel: {type: string, required: true, validator: vessel_ref}
+      category: {type: string, required: true}   # TBC: material taxonomy
+      description: {type: string}
+    external_ids: []
+  waste:
+    code: WST
+    requirement: REG-04
+    attributes:
+      origin_vessel: {type: string, required: true, validator: vessel_ref}
+      waste_stream: {type: string, required: true}  # TBC: waste classification codes
+      hazardous: {type: boolean}
+      description: {type: string}
+    external_ids: []
+
+# Guard rail for D5 / WRK-03: worker attributes may never match these. Health records stay
+# out until the privacy position is decided.
+worker_forbidden_attribute_patterns:
+  - health
+  - medical
+  - diagnos
+  - disease
+  - blood
+  - hiv
+  - pregnan
+  - disab
+  - fitness
+  - illness
+  - vaccin
