@@ -23,7 +23,7 @@ jobs:
   lint:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - run: pip install --require-hashes -r requirements-dev.lock && pip install --no-deps -e .
@@ -46,7 +46,7 @@ jobs:
       matrix:
         database: [sqlite, postgresql]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - run: pip install --require-hashes -r requirements-dev.lock && pip install --no-deps -e .
@@ -61,7 +61,7 @@ jobs:
   dependency-scan:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - run: pip install pip-audit
@@ -71,7 +71,7 @@ jobs:
   secret-scan:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with: {fetch-depth: 0}
       - name: gitleaks (full history)
         run: docker run --rm -v "$PWD:/repo" "$GITLEAKS_IMAGE" git /repo --redact --verbose
@@ -79,7 +79,7 @@ jobs:
   static-analysis:
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
       - run: pip install bandit
@@ -94,7 +94,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [lint, test]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: build image
         run: docker build -t nsrdp:${{ github.sha }} .
       - name: trivy image (OS and library vulnerabilities)
