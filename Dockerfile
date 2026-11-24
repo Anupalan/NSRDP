@@ -1,6 +1,6 @@
 # NSRDP platform core. One image runs the API, the outbox worker and migrations.
 # Base image is public and open source so it can be mirrored into a GI Cloud registry.
-FROM python:3.12-slim-bookworm AS build
+FROM python:3.15-slim-bookworm AS build
 ENV PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
 WORKDIR /build
 COPY requirements.lock ./
@@ -10,7 +10,7 @@ COPY pyproject.toml ./
 COPY src ./src
 RUN /opt/venv/bin/pip install --no-deps .
 
-FROM python:3.12-slim-bookworm
+FROM python:3.15-slim-bookworm
 ENV PATH=/opt/venv/bin:$PATH \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
