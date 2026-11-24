@@ -13,9 +13,15 @@ through environment variables and YAML policy files in `config/`.
 
 ```bash
 python -m venv .venv && . .venv/bin/activate
-pip install -e ".[dev]"
+pip install --require-hashes -r requirements-dev.lock && pip install --no-deps -e .
 pytest                                    # SQLite in memory
 NSRDP_TEST_DATABASE_URL=postgresql+psycopg://nsrdp:nsrdp@localhost/nsrdp_test pytest
+```
+
+## Run locally in containers
+
+```bash
+docker compose up --build    # API on http://localhost:8000/healthz
 ```
 
 ## Migrate a database

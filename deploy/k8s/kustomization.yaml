@@ -1,0 +1,17 @@
+# Kubernetes baseline for GI Cloud (MeghRaj) or any conformant cluster.
+# Environment overlays (namespace, image registry, replica counts, resource sizes) are TBC
+# and belong in deploy/k8s/overlays/<env>/, not here.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+labels:
+  - pairs: {app.kubernetes.io/part-of: nsrdp}
+resources:
+  - configmap.yaml
+  - migrate-job.yaml
+  - api.yaml
+  - worker.yaml
+  - networkpolicy.yaml
+images:
+  - name: nsrdp
+    newName: REGISTRY_TBC/nsrdp
+    newTag: latest
