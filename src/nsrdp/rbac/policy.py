@@ -18,6 +18,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from nsrdp.config import load_policy
+from nsrdp.events import audit
 from nsrdp.rbac.models import RoleAssignment
 from nsrdp.tenancy.models import Tenant
 from nsrdp.tenancy.scope import system_scope
@@ -116,6 +117,15 @@ def assign_role(
     )
     session.add(ra)
     session.flush()
+    audit.record(
+        session,
+        tenant_id=tenant.id,
+        actor=granted_by,
+        action="role.granted",
+        target_type="role_assignment",
+        target_id=ra.id,
+        details={"principal_id": principal_id, "role": role},
+    )
     return ra
 
 

@@ -19,6 +19,7 @@ from sqlalchemy import event, func, inspect, or_, select
 from sqlalchemy.orm import Session
 
 from nsrdp.db import utcnow
+from nsrdp.events import audit
 from nsrdp.rbac.policy import RbacPolicy, authorize, ensure_distinct_actors
 from nsrdp.rules import expr
 from nsrdp.rules.models import Decision, RuleVersion
@@ -79,6 +80,7 @@ def draft_rule(
     )
     session.add(rv)
     session.flush()
+    _audit(session, rv, actor, "rule.drafted", {"rule_key": rule_key, "version": rv.version})
     return rv
 
 
@@ -101,6 +103,13 @@ def approve_rule(
     rule_version.approved_by = actor
     rule_version.approved_at = now
     session.flush()
+    _audit(
+        session,
+        rule_version,
+        actor,
+        "rule.approved",
+        {"effective_from": rule_version.effective_from.isoformat()},
+    )
     return rule_version
 
 
@@ -121,7 +130,20 @@ def retire_rule(
         raise RuleError("cannot retire retroactively")
     rule_version.effective_to = at
     session.flush()
+    _audit(session, rule_version, actor, "rule.retired", {"effective_to": at.isoformat()})
     return rule_version
+
+
+def _audit(session: Session, rv: RuleVersion, actor: str, action: str, details: dict) -> None:
+    audit.record(
+        session,
+        tenant_id=rv.tenant_id,
+        actor=actor,
+        action=action,
+        target_type="rule_version",
+        target_id=rv.id,
+        details=details,
+    )
 
 
 def _aware(dt: datetime) -> datetime:

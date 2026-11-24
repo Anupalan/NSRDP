@@ -28,3 +28,34 @@ def test_migrations_match_models():
     command.downgrade(cfg, "base")
     engine.dispose()
     assert diff == []
+
+
+@pytest.mark.skipif(not PG.startswith("postgresql"), reason="needs PostgreSQL")
+def test_migrated_event_table_is_append_only():
+    from sqlalchemy import text
+
+    engine = create_engine(PG)
+    Base.metadata.drop_all(engine)
+    with engine.begin() as conn:
+        conn.exec_driver_sql("DROP TABLE IF EXISTS alembic_version")
+    cfg = Config("alembic.ini")
+    cfg.attributes["url"] = PG
+    command.upgrade(cfg, "head")
+    try:
+        with engine.begin() as conn:
+            conn.exec_driver_sql(
+                "INSERT INTO tenants (id, level, code, name, tenant_path, created_at) "
+                "VALUES ('t', 'platform', 'P', 'P', '/t/', now())"
+            )
+            conn.exec_driver_sql(
+                "INSERT INTO events (id, tenant_id, tenant_path, stream_type, stream_id, seq, "
+                "event_type, evidence, actor, occurred_at, recorded_at, hash) VALUES "
+                "('e', 't', '/t/', 's', '1', 1, 'x', '[]', 'a', now(), now(), 'h')"
+            )
+        with pytest.raises(Exception, match="append-only"), engine.begin() as conn:
+            conn.execute(text("UPDATE events SET actor = 'b'"))
+    finally:
+        with engine.begin() as conn:
+            conn.exec_driver_sql("DROP TRIGGER IF EXISTS events_append_only ON events")
+        command.downgrade(cfg, "base")
+        engine.dispose()
