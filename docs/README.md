@@ -21,3 +21,4 @@ Tests run on SQLite for speed and on PostgreSQL in CI.
 | # | Item | Requirement IDs | Notes |
 |---|---|---|---|
 | 1 | Tenant and RBAC skeleton | PLT-01, REC-02 | [01-tenancy-rbac.md](01-tenancy-rbac.md) |
+| 2 | Versioned rules engine | REC-01 (D2) | [02-rules-engine.md](02-rules-engine.md) |
