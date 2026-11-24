@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with: {python-version: "3.12"}
       - run: pip install --require-hashes -r requirements-dev.lock && pip install --no-deps -e .
       - run: ruff check .
@@ -47,7 +47,7 @@ jobs:
         database: [sqlite, postgresql]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with: {python-version: "3.12"}
       - run: pip install --require-hashes -r requirements-dev.lock && pip install --no-deps -e .
       - name: pytest (${{ matrix.database }})
@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with: {python-version: "3.12"}
       - run: pip install pip-audit
       - name: pip-audit (known vulnerabilities in locked dependencies)
@@ -80,7 +80,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with: {python-version: "3.12"}
       - run: pip install bandit
       - name: bandit (Python SAST)
