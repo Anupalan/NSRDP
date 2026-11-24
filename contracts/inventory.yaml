@@ -1,0 +1,15 @@
+# Integration inventory from the developer handover, section 5. ALL CANDIDATE, NONE CONFIRMED.
+# Every connector has an owner; a contract file once its proposed operations are drafted.
+connectors:
+  - {no: 1,  name: identity,       system: "Identity / e-KYC provider",                 req: WRK-01, owner: "SI integration lead (named person TBC)", contract: pending}
+  - {no: 2,  name: esign,          system: "eSign provider",                            req: SIG-01, owner: "SI integration lead (named person TBC)", contract: esign.yaml}
+  - {no: 3,  name: gi_cloud,       system: "GI Cloud",                                  req: INF-01, owner: "SI infrastructure lead (named person TBC)", contract: not_applicable}
+  - {no: 4,  name: state_maritime, system: "State maritime and port authorities",       req: INT-01, owner: "SI integration lead (named person TBC)", contract: pending}
+  - {no: 5,  name: pollution_ctrl, system: "State pollution control / environment bodies", req: TRC-02, owner: "SI integration lead (named person TBC)", contract: pending}
+  - {no: 6,  name: customs_pcs,    system: "Customs and port community systems",        req: TRC-01, owner: "SI integration lead (named person TBC)", contract: pending}
+  - {no: 7,  name: vessel_data,    system: "Class societies and vessel databases",      req: REG-02, owner: "SI integration lead (named person TBC)", contract: vessel_data.yaml}
+  - {no: 8,  name: payments,       system: "Payment and settlement",                    req: MKT-01, owner: "SI integration lead (named person TBC)", contract: pending}
+  - {no: 9,  name: iot,            system: "IoT devices and gateways",                  req: INT-03, owner: "SI integration lead (named person TBC)", contract: pending}
+  - {no: 10, name: notifications,  system: "SMS, e-mail, messaging",                    req: REC-08, owner: "SI integration lead (named person TBC)", contract: notifications.yaml}
+  - {no: 11, name: legacy_data,    system: "Legacy and offline data",                   req: REC-03, owner: "SI data migration lead (named person TBC)", contract: pending}
+  - {no: 12, name: siem,           system: "SIEM / SOC feeds",                          req: REC-06, owner: "SI security lead (named person TBC)", contract: siem.yaml}

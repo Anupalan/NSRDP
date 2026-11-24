@@ -1,0 +1,20 @@
+# Default deny ingress; only the API accepts traffic (from the ingress controller, whose
+# namespace label is TBC per GI Cloud network baseline).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nsrdp-default-deny-ingress
+spec:
+  podSelector: {}
+  policyTypes: [Ingress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: nsrdp-api-ingress
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/name: nsrdp-api}
+  policyTypes: [Ingress]
+  ingress:
+    - ports: [{port: 8000, protocol: TCP}]

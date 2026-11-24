@@ -1,0 +1,33 @@
+name: notifications
+inventory_no: 10
+requirement: REC-08
+status: candidate          # provider and languages are TBC
+owner: "SI integration lead (named person TBC)"
+transport: REST
+operations:
+  send:
+    idempotent: true
+    request:
+      type: object
+      required: [channel, recipient_ref, template, locale, params]
+      additionalProperties: false
+      properties:
+        channel: {type: string, enum: [sms, email]}
+        recipient_ref: {type: string, examples: ["idp:officer-1"]}
+        template: {type: string, examples: ["certificate.expiry"]}
+        locale: {type: string, examples: ["en"]}     # supported languages TBC
+        params: {type: object, examples: [{"days": 30}]}
+    response:
+      type: object
+      required: [message_id, accepted]
+      properties:
+        message_id: {type: string, examples: ["N-0001"]}
+        accepted: {type: boolean, examples: [true]}
+reconcile:
+  operation: list_acknowledged
+  list_acknowledged:
+    request: {type: object, properties: {since: {type: string, examples: ["2027-01-01T00:00:00Z"]}}}
+    response:
+      type: object
+      required: [keys]
+      properties: {keys: {type: array, items: {type: string}}}

@@ -20,6 +20,7 @@ class Settings(BaseSettings):
 
     database_url: str = "sqlite+pysqlite:///:memory:"
     config_dir: Path = Path(__file__).resolve().parents[2] / "config"
+    contracts_dir: Path = Path(__file__).resolve().parents[2] / "contracts"
     environment: str = "local"
     auth_mode: Literal["disabled", "dev"] = "disabled"
 

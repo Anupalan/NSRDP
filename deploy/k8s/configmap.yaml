@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nsrdp-config
+data:
+  NSRDP_ENVIRONMENT: "baseline"
+  NSRDP_AUTH_MODE: "disabled"          # identity provider TBC; never "dev" outside local
+  NSRDP_LOG_LEVEL: "INFO"
+  NSRDP_DISPATCH_INTERVAL_SECONDS: "10"
+# NSRDP_DATABASE_URL comes from Secret "nsrdp-db" (key: url), created by the platform team
+# from the GI Cloud secret store. No secret values are kept in this repository.

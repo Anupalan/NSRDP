@@ -2,6 +2,7 @@
 
 
 def import_all_models() -> None:
+    import nsrdp.connectors.models  # noqa: F401
     import nsrdp.events.models  # noqa: F401
     import nsrdp.events.store  # noqa: F401  (registers append-only listeners)
     import nsrdp.rbac.models  # noqa: F401

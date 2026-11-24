@@ -1,0 +1,25 @@
+name: vessel_data
+inventory_no: 7
+requirement: REG-02
+status: candidate          # access to class society / vessel databases is TBC
+owner: "SI integration lead (named person TBC)"
+transport: REST
+operations:
+  lookup_vessel:
+    idempotent: true
+    request:
+      type: object
+      required: [imo_number]
+      additionalProperties: false
+      properties:
+        imo_number: {type: string, pattern: "^[0-9]{7}$", examples: ["9074729"]}
+    response:
+      type: object
+      required: [imo_number, found]
+      properties:
+        imo_number: {type: string, examples: ["9074729"]}
+        found: {type: boolean, examples: [true]}
+        name: {type: string, examples: ["MV Example"]}
+        flag_state: {type: string, examples: ["PA"]}
+        gross_tonnage: {type: number, examples: [25000]}
+        class_society: {type: string, examples: ["Example Class"]}
